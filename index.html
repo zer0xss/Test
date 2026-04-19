@@ -1,64 +1,210 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>로그인 페이지</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .login-container {
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 300px;
-        }
-        h2 {
-            text-align: center;
-        }
-        input[type="text"], input[type="password"] {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        button {
-            width: 100%;
-            padding: 10px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-    </style>
+<meta charset="UTF-8">
+<title>바카라 ALL-IN-ONE</title>
+<style>
+body {
+    background: radial-gradient(circle, #032b1f, #000);
+    color: white;
+    text-align: center;
+    font-family: Arial;
+}
+
+h1 {margin:10px;}
+
+.chip {
+    display:inline-block;
+    background: gold;
+    color:black;
+    padding:10px;
+    margin:5px;
+    border-radius:50%;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+button {
+    padding:10px 20px;
+    margin:5px;
+    cursor:pointer;
+}
+
+.card {
+    width:70px;
+    margin:5px;
+    transform: rotateY(180deg);
+    animation: flip 0.6s forwards;
+}
+
+@keyframes flip {
+    to {transform: rotateY(0);}
+}
+
+.win {color:#00ffcc;}
+.lose {color:red;}
+
+.history span {
+    display:inline-block;
+    width:10px;
+    height:10px;
+    margin:2px;
+    border-radius:50%;
+}
+.player {background:blue;}
+.banker {background:red;}
+.tie {background:green;}
+</style>
 </head>
 <body>
+<h1>🎲 바카라 ALL-IN-ONE</h1>
+<h2>💰 칩: <span id="money">1000</span></h2>
+<div>
+    <div>칩 선택</div>
+    <span class="chip" onclick="selectChip(100)">100</span>
+    <span class="chip" onclick="selectChip(500)">500</span>
+    <span class="chip" onclick="selectChip(1000)">1000</span>
+</div>
+<h3>현재 베팅: <span id="bet">0</span></h3>
+<div>
+    <button onclick="startGame('player')">플레이어</button>
+    <button onclick="startGame('banker')">뱅커</button>
+    <button onclick="startGame('tie')">타이</button>
+</div>
+<h3 id="dealer">딜러: 베팅하세요</h3>
+<h2>플레이어</h2>
+<div id="player"></div>
+<h2>뱅커</h2>
+<div id="banker"></div>
+<h2 id="result">대기중...</h2>
+<h3>결과 기록</h3>
+<div id="history"></div>
+<script>
+let money = 1000;
+let currentChip = 0;
+let history = [];
 
-    <div class="login-container">
-        <h2>로그인</h2>
-        <form action="login.php" method="POST">
-            <label for="username">아이디</label>
-            <input type="text" id="username" name="username" placeholder="아이디를 입력하세요" required>
-            
-            <label for="password">비밀번호</label>
-            <input type="password" id="password" name="password" placeholder="비밀번호를 입력하세요" required>
-            
-            <button type="submit">로그인</button>
-        </form>
-    </div>
+const suits=["S","H","D","C"];
+const ranks=["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
 
+function getValue(r){
+    if(["10","J","Q","K"].includes(r)) return 0;
+    if(r==="A") return 1;
+    return parseInt(r);
+}
+
+function drawCard(){
+    let r=ranks[Math.floor(Math.random()*13)];
+    let s=suits[Math.floor(Math.random()*4)];
+    return {
+        img:`assets/realisticgames_carddeck/PNG/${r}${s}.png`,
+        value:getValue(r)
+    };
+}
+
+function getTotal(cards){
+    return cards.reduce((sum,c)=>sum+c.value,0)%10;
+}
+
+function selectChip(v){
+    currentChip = v;
+    document.getElementById("bet").innerText = v;
+}
+
+function renderCards(id, cards){
+    let html="";
+    cards.forEach((c,i)=>{
+        html += `<img src="${c.img}" class="card" style="animation-delay:${i*0.3}s">`;
+    });
+    document.getElementById(id).innerHTML = html;
+}
+
+function delay(ms){
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function startGame(choice){
+    if(currentChip === 0) return alert("칩 선택");
+    if(currentChip > money) return alert("칩 부족");
+
+    document.getElementById("dealer").innerText = "딜러: 카드 배분 중...";
+
+    let player = [drawCard(), drawCard()];
+    let banker = [drawCard(), drawCard()];
+
+    renderCards("player", player);
+    await delay(600);
+    renderCards("banker", banker);
+
+    let pTotal = getTotal(player);
+    let bTotal = getTotal(banker);
+
+    // 공식 룰
+    if(pTotal <= 5){
+        let third = drawCard();
+        await delay(600);
+        player.push(third);
+        renderCards("player", player);
+
+        if(bTotal <= 2 ||
+           (bTotal === 3 && third.value !== 8) ||
+           (bTotal === 4 && third.value >= 2 && third.value <= 7) ||
+           (bTotal === 5 && third.value >= 4 && third.value <= 7) ||
+           (bTotal === 6 && (third.value === 6 || third.value === 7))){
+            await delay(600);
+            banker.push(drawCard());
+            renderCards("banker", banker);
+        }
+    } else if(bTotal <= 5){
+        await delay(600);
+        banker.push(drawCard());
+        renderCards("banker", banker);
+    }
+
+    pTotal = getTotal(player);
+    bTotal = getTotal(banker);
+
+    let result = pTotal > bTotal ? "player" : pTotal < bTotal ? "banker" : "tie";
+
+    let text="";
+    if(choice === result){
+        if(result === "tie") money += currentChip * 8;
+        else if(result === "banker") money += currentChip * 0.95;
+        else money += currentChip;
+        text = "승리 🎉";
+        resultEl.className = "win";
+    } else {
+        money -= currentChip;
+        text = "패배 💀";
+        resultEl.className = "lose";
+    }
+
+    money = Math.floor(money);
+
+    document.getElementById("money").innerText = money;
+
+    let resultEl = document.getElementById("result");
+    resultEl.innerText = `${result.toUpperCase()} (${pTotal}:${bTotal}) → ${text}`;
+
+    document.getElementById("dealer").innerText = "딜러: 결과 발표";
+
+    history.push(result);
+    drawHistory();
+
+    if(money <= 0){
+        alert("파산 💀");
+        money = 1000;
+    }
+}
+
+function drawHistory(){
+    let html="";
+    history.slice(-40).forEach(r=>{
+        html += `<span class="${r}"></span>`;
+    });
+    document.getElementById("history").innerHTML = html;
+}
+</script>
 </body>
 </html>
+:::
