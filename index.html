@@ -1,6 +1,6 @@
 from pathlib import Path
 
-html = '''<!doctype html>
+html = r'''<!doctype html>
 
 <html lang="ko">
 
@@ -8,37 +8,67 @@ html = '''<!doctype html>
 
 <meta charset="utf-8">
 
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 
 <title>사이렌 사운드 패드</title>
 
 <style>
 
-body{margin:0;background:#111;color:#fff;font-family:-apple-system,BlinkMacSystemFont,sans-serif;display:flex;justify-content:center;min-height:100vh}
+*{box-sizing:border-box}
 
-.app{width:min(92vw,560px);margin:auto;padding:24px;border-radius:22px;background:#1d1d1f}
+html,body{margin:0;min-height:100%;background:#111;color:#fff}
 
-h1{margin:0 0 6px}.sub{color:#aaa;margin:0 0 20px;font-size:14px}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:20px}
+
+.app{width:100%;max-width:560px;margin:0 auto;padding:22px;border-radius:22px;background:#1d1d1f;box-shadow:0 10px 35px #0008}
+
+h1{margin:0 0 6px;font-size:27px}
+
+.sub{color:#aaa;margin:0 0 20px;font-size:14px}
 
 .actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
 
-label,.filebtn{display:block;padding:16px;border:1px solid #555;border-radius:14px;text-align:center;cursor:pointer;background:#333;color:#fff;font-weight:700}
+.filebtn{display:flex;align-items:center;justify-content:center;min-height:56px;padding:14px;border:1px solid #555;border-radius:14px;text-align:center;cursor:pointer;background:#333;color:#fff;font-weight:700}
 
 input[type=file]{display:none}
 
-#buttons{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+#buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 
-button{border:0;border-radius:14px;padding:22px 10px;font-size:17px;font-weight:700;background:#333;color:white}
+.sound-btn{min-height:70px;border:0;border-radius:14px;padding:16px 10px;font-size:17px;font-weight:700;background:#333;color:#fff;cursor:pointer;overflow:hidden}
 
-button:active{transform:scale(.97)}.stop{background:#8d2222}
+.sound-btn.active{background:#176b35;box-shadow:0 0 0 2px #2ee66b inset}
 
-.volume{margin-top:20px}.row{display:flex;justify-content:space-between;color:#ccc;margin-bottom:8px}
+.sound-btn:active{transform:scale(.97)}
 
-input[type=range]{width:100%}#status{margin-top:14px;color:#aaa;font-size:13px;min-height:20px}
+.stop{background:#8d2222}
 
-#names{margin-top:12px;color:#bbb;font-size:13px;line-height:1.7}
+.volume{margin-top:20px}
+
+.row{display:flex;justify-content:space-between;color:#ccc;margin-bottom:8px}
+
+input[type=range]{width:100%}
+
+#status{margin-top:14px;color:#aaa;font-size:13px;min-height:20px}
+
+#names{margin-top:12px;color:#bbb;font-size:13px;line-height:1.7;word-break:break-all}
 
 .note{margin-top:12px;color:#777;font-size:12px;line-height:1.5}
+
+.empty{grid-column:1/-1;color:#777;text-align:center;padding:25px 5px}
+
+@media(max-width:400px){
+
+ body{padding:12px}
+
+ .app{padding:17px;border-radius:18px}
+
+ .actions,#buttons{gap:8px}
+
+ .filebtn{font-size:14px}
+
+ .sound-btn{font-size:15px}
+
+}
 
 </style>
 
@@ -50,21 +80,25 @@ input[type=range]{width:100%}#status{margin-top:14px;color:#aaa;font-size:13px;m
 
 <h1>사이렌 사운드 패드</h1>
 
-<p class="sub">파일 앱의 MP3를 선택해서 버튼으로 바로 재생하세요.</p>
+<p class="sub">파일 앱의 MP3를 선택해서 여러 소리를 동시에 켜고 끌 수 있습니다.</p>
 
 <div class="actions">
 
-<label>＋ MP3 추가
+<label class="filebtn">＋ MP3 추가
 
-<input id="files" type="file" accept=".mp3,audio/mpeg,audio/*" multiple></label>
+<input id="files" type="file" accept=".mp3,audio/mpeg,audio/*" multiple>
 
-<label>＋ 파일 앱에서 선택
+</label>
 
-<input id="files2" type="file" accept=".mp3,audio/mpeg,audio/*" multiple></label>
+<label class="filebtn">＋ 파일 앱에서 선택
+
+<input id="files2" type="file" accept=".mp3,audio/mpeg,audio/*" multiple>
+
+</label>
 
 </div>
 
-<div id="buttons"></div>
+<div id="buttons"><div class="empty">MP3 파일을 추가하세요.</div></div>
 
 <div class="volume">
 
@@ -78,127 +112,253 @@ input[type=range]{width:100%}#status{margin-top:14px;color:#aaa;font-size:13px;m
 
 <div id="names"></div>
 
-<div class="note">※ iPhone에서는 파일 선택 창이 뜨면 「파일」 앱에서 MP3를 선택하세요.</div>
+<div class="note">※ iPhone에서는 파일 선택 창에서 「파일」 앱에 있는 MP3를 선택하세요.<br>※ 버튼을 다시 누르면 해당 소리만 꺼집니다. 여러 버튼을 동시에 켤 수 있습니다.</div>
 
 </div>
 
 <script>
 
-let sounds=[],current=null;
+const sounds=[];
 
 const $=id=>document.getElementById(id);
 
-function stop(){
+function stopAll(){
 
- if(current){current.pause();current.currentTime=0;current=null}
+  sounds.forEach(s=>{
 
- $('status').textContent='꺼짐';
+    if(s.audio){
+
+      s.audio.pause();
+
+      s.audio.currentTime=0;
+
+      s.audio=null;
+
+    }
+
+    s.active=false;
+
+  });
+
+  render();
+
+  updateStatus();
 
 }
 
-function play(i){
+function toggle(i){
 
- if(!sounds[i])return;
+  const s=sounds[i];
 
- stop();
+  if(!s)return;
 
- current=new Audio(sounds[i].url);
+  if(s.active){
 
- current.volume=+$('vol').value;
+    if(s.audio){
 
- current.play().then(()=>{
+      s.audio.pause();
 
-   $('status').textContent='재생 중: '+sounds[i].name;
+      s.audio.currentTime=0;
 
- }).catch(()=>{
+      s.audio=null;
 
-   $('status').textContent='재생할 수 없습니다. 버튼을 다시 눌러보세요.';
+    }
 
- });
+    s.active=false;
 
- current.onended=()=>{
+    render();
 
-   current=null;
+    updateStatus();
 
-   $('status').textContent='재생 완료';
+    return;
 
- };
+  }
+
+  // 이미 만들어 둔 Audio 객체를 즉시 재생해 지연을 줄임
+
+  if(!s.audio){
+
+    s.audio=new Audio(s.url);
+
+    s.audio.preload='auto';
+
+    s.audio.volume=+$('vol').value;
+
+    s.audio.addEventListener('ended',()=>{
+
+      s.active=false;
+
+      s.audio=null;
+
+      render();
+
+      updateStatus();
+
+    });
+
+  }
+
+  s.audio.currentTime=0;
+
+  s.audio.volume=+$('vol').value;
+
+  s.active=true;
+
+  render();
+
+  updateStatus();
+
+  const p=s.audio.play();
+
+  if(p) p.catch(()=>{
+
+    s.active=false;
+
+    s.audio=null;
+
+    render();
+
+    $('status').textContent='재생할 수 없습니다. 버튼을 다시 눌러보세요.';
+
+  });
 
 }
 
 function addFiles(fileList){
 
- const incoming=[...fileList].filter(f=>{
+  const incoming=[...fileList].filter(f=>{
 
-   const name=f.name.toLowerCase();
+    const name=f.name.toLowerCase();
 
-   return name.endsWith('.mp3') || f.type==='audio/mpeg' || f.type.startsWith('audio/');
+    return name.endsWith('.mp3') || f.type==='audio/mpeg' || f.type.startsWith('audio/');
 
- });
+  });
 
- incoming.forEach(f=>{
+  incoming.forEach(f=>{
 
-   if(sounds.length>=12)return;
+    if(sounds.length>=12)return;
 
-   sounds.push({name:f.name,url:URL.createObjectURL(f)});
+    const audio=new Audio();
 
- });
+    audio.preload='auto';
 
- render();
+    audio.src=URL.createObjectURL(f);
+
+    sounds.push({name:f.name,url:audio.src,audio:null,preloaded:audio,active:false});
+
+    // 브라우저가 미리 로드할 수 있게 준비
+
+    audio.load();
+
+  });
+
+  render();
+
+  updateStatus();
 
 }
 
 function render(){
 
- $('buttons').innerHTML='';
+  const box=$('buttons');
 
- sounds.forEach((s,i)=>{
+  box.innerHTML='';
 
-   let b=document.createElement('button');
+  if(!sounds.length){
 
-   b.textContent='▶ '+(i+1);
+    box.innerHTML='<div class="empty">MP3 파일을 추가하세요.</div>';
 
-   b.title=s.name;
+  }else{
 
-   b.onclick=()=>play(i);
+    sounds.forEach((s,i)=>{
 
-   $('buttons').appendChild(b);
+      const b=document.createElement('button');
 
- });
+      b.className='sound-btn'+(s.active?' active':'');
 
- let b=document.createElement('button');
+      b.textContent=(s.active?'■ ':'▶ ')+(i+1);
 
- b.textContent='■ 끄기';
+      b.title=s.name;
 
- b.className='stop';
+      b.setAttribute('aria-label',s.name);
 
- b.onclick=stop;
+      b.onclick=()=>toggle(i);
 
- $('buttons').appendChild(b);
+      box.appendChild(b);
 
- $('names').innerHTML=sounds.length
+    });
 
-   ? sounds.map((s,i)=>(i+1)+'. '+s.name).join('<br>')
+    const b=document.createElement('button');
 
-   : '';
+    b.className='sound-btn stop';
 
- $('status').textContent=sounds.length+'개 준비 완료';
+    b.textContent='■ 모두 끄기';
+
+    b.onclick=stopAll;
+
+    box.appendChild(b);
+
+  }
+
+  $('names').innerHTML=sounds.length
+
+    ? sounds.map((s,i)=>(i+1)+'. '+s.name).join('<br>')
+
+    : '';
 
 }
 
-$('files').onchange=e=>{addFiles(e.target.files);e.target.value=''};
+function updateStatus(){
 
-$('files2').onchange=e=>{addFiles(e.target.files);e.target.value=''};
+  const active=sounds.filter(s=>s.active);
 
-$('vol').oninput=()=>{
+  if(!sounds.length){
 
- const v=+$('vol').value;
+    $('status').textContent='MP3 파일을 추가하세요.';
 
- $('vt').textContent=Math.round(v*100)+'%';
+  }else if(!active.length){
 
- if(current)current.volume=v;
+    $('status').textContent=sounds.length+'개 준비 완료 · 모두 꺼짐';
 
-};
+  }else{
+
+    $('status').textContent='재생 중: '+active.map(s=>s.name).join(' + ');
+
+  }
+
+}
+
+$('files').addEventListener('change',e=>{
+
+  addFiles(e.target.files);
+
+  e.target.value='';
+
+});
+
+$('files2').addEventListener('change',e=>{
+
+  addFiles(e.target.files);
+
+  e.target.value='';
+
+});
+
+$('vol').addEventListener('input',()=>{
+
+  const v=+$('vol').value;
+
+  $('vt').textContent=Math.round(v*100)+'%';
+
+  sounds.forEach(s=>{
+
+    if(s.audio)s.audio.volume=v;
+
+  });
+
+});
+
+render();
 
 </script>
 
@@ -206,7 +366,7 @@ $('vol').oninput=()=>{
 
 </html>'''
 
-path = Path("/mnt/data/siren_sound_pad_v2.html")
+path = Path("/mnt/data/siren_sound_pad_fixed.html")
 
 path.write_text(html, encoding="utf-8")
 
