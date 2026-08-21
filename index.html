@@ -6,10 +6,14 @@ html = r'''<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 
-<title>사이렌 사운드 패드 v6</title>
+<title>사이렌 사운드 패드 v7</title>
 
 <style>
-*{box-sizing:border-box}
+*{
+box-sizing:border-box;
+-webkit-tap-highlight-color:transparent;
+touch-action:manipulation;
+}
 
 html,body{
 margin:0;
@@ -205,7 +209,7 @@ grid-template-columns:1fr 72px
 
 <h1>
 사이렌 사운드 패드
-<span class="version">v6</span>
+<span class="version">v7</span>
 </h1>
 
 <p class="sub">
@@ -329,9 +333,6 @@ async function unlockAudio(){
 
 /* =========================================
    개별 소리 재생
-
-   버튼을 누를 때마다
-   무조건 처음부터 재생
 ========================================= */
 
 async function playSound(i){
@@ -341,15 +342,8 @@ async function playSound(i){
     if(!s || !s.buffer || s.loading)
         return;
 
-
     const ctx =
         await unlockAudio();
-
-
-    /*
-       이미 재생 중이면 기존 소스를
-       즉시 정지한다.
-    */
 
     if(s.source){
 
@@ -365,36 +359,23 @@ async function playSound(i){
 
     }
 
-
-    /*
-       BufferSource는 이미 디코딩된
-       MP3 데이터를 사용하므로
-       여기서는 파일을 다시 읽거나
-       디코딩하지 않는다.
-    */
-
     const source =
         ctx.createBufferSource();
-
 
     source.buffer =
         s.buffer;
 
-
     const gain =
         ctx.createGain();
 
-
     gain.gain.value =
         Number($('vol').value);
-
 
     source.connect(gain);
 
     gain.connect(
         ctx.destination
     );
-
 
     source.onended=()=>{
 
@@ -410,19 +391,10 @@ async function playSound(i){
 
     };
 
-
     s.source=source;
     s.active=true;
 
-
-    /*
-       핵심:
-       예약 시간을 두지 않고
-       현재 오디오 시간에 즉시 시작.
-    */
-
     source.start(0);
-
 
     render();
     updateStatus();
@@ -440,7 +412,6 @@ function stopSound(i){
 
     if(!s)return;
 
-
     if(s.source){
 
         try{
@@ -455,9 +426,7 @@ function stopSound(i){
 
     }
 
-
     s.active=false;
-
 
     render();
     updateStatus();
@@ -491,7 +460,6 @@ function stopAll(){
 
     });
 
-
     render();
     updateStatus();
 
@@ -500,9 +468,6 @@ function stopAll(){
 
 /* =========================================
    MP3 파일 추가
-
-   파일을 선택하는 순간
-   AudioBuffer까지 미리 만들어 놓는다.
 ========================================= */
 
 async function addFiles(fileList){
@@ -520,20 +485,16 @@ async function addFiles(fileList){
 
     });
 
-
     if(!incoming.length)
         return;
 
-
     const ctx =
         await unlockAudio();
-
 
     for(const file of incoming){
 
         if(sounds.length>=12)
             break;
-
 
         const sound={
 
@@ -551,39 +512,22 @@ async function addFiles(fileList){
 
         };
 
-
         sounds.push(sound);
-
 
         render();
         updateStatus();
 
-
         try{
-
-            /*
-               파일을 메모리로 읽는다.
-            */
 
             const arrayBuffer =
                 await file.arrayBuffer();
-
-
-            /*
-               MP3를 미리 디코딩한다.
-
-               버튼을 누를 때는 이 작업을
-               하지 않는다.
-            */
 
             sound.buffer =
                 await ctx.decodeAudioData(
                     arrayBuffer.slice(0)
                 );
 
-
             sound.loading=false;
-
 
         }catch(error){
 
@@ -593,7 +537,6 @@ async function addFiles(fileList){
             sound.error=true;
 
         }
-
 
         render();
         updateStatus();
@@ -614,7 +557,6 @@ function render(){
 
     box.innerHTML='';
 
-
     if(!sounds.length){
 
         box.innerHTML=
@@ -624,7 +566,6 @@ function render(){
 
     }
 
-
     sounds.forEach((s,i)=>{
 
         const row =
@@ -633,18 +574,12 @@ function render(){
         row.className=
             'sound-row';
 
-
-        /*
-           재생 버튼
-        */
-
         const playButton =
             document.createElement('button');
 
         playButton.className=
             'sound-btn' +
             (s.active ? ' active' : '');
-
 
         if(s.loading){
 
@@ -670,14 +605,8 @@ function render(){
 
         }
 
-
         playButton.title=
             s.name;
-
-
-        /*
-           개별 끄기 버튼
-        */
 
         const offButton =
             document.createElement('button');
@@ -691,7 +620,6 @@ function render(){
         offButton.onclick=
             ()=>stopSound(i);
 
-
         row.appendChild(
             playButton
         );
@@ -700,17 +628,11 @@ function render(){
             offButton
         );
 
-
         box.appendChild(
             row
         );
 
     });
-
-
-    /*
-       모두 끄기
-    */
 
     const allStop =
         document.createElement('button');
@@ -724,15 +646,9 @@ function render(){
     allStop.onclick=
         stopAll;
 
-
     box.appendChild(
         allStop
     );
-
-
-    /*
-       파일 이름
-    */
 
     $('names').innerHTML=
         sounds
@@ -756,12 +672,10 @@ function updateStatus(){
             s=>s.active
         );
 
-
     const loading =
         sounds.filter(
             s=>s.loading
         );
-
 
     if(!sounds.length){
 
@@ -772,7 +686,6 @@ function updateStatus(){
 
     }
 
-
     if(loading.length){
 
         $('status').textContent=
@@ -781,7 +694,6 @@ function updateStatus(){
         return;
 
     }
-
 
     if(!active.length){
 
@@ -792,7 +704,6 @@ function updateStatus(){
         return;
 
     }
-
 
     $('status').textContent=
         '재생 중: '+
@@ -819,7 +730,6 @@ $('files').addEventListener(
 
     }
 );
-
 
 $('files2').addEventListener(
     'change',
@@ -848,15 +758,8 @@ $('vol').addEventListener(
                 $('vol').value
             );
 
-
         $('vt').textContent=
             Math.round(v*100)+'%';
-
-
-        /*
-           이미 재생 중인 소리의
-           볼륨도 즉시 변경
-        */
 
         sounds.forEach(s=>{
 
@@ -872,9 +775,7 @@ $('vol').addEventListener(
 );
 
 
-/*
-   초기 화면
-*/
+/* 초기 화면 */
 
 render();
 
@@ -883,8 +784,7 @@ render();
 </body>
 </html>'''
 
-
-path=Path("/mnt/data/siren_sound_pad_v6.html")
+path=Path("/mnt/data/siren_sound_pad_v7.html")
 
 path.write_text(
     html,
