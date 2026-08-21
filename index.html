@@ -1,192 +1,213 @@
-<!DOCTYPE html>
+from pathlib import Path
+
+html = '''<!doctype html>
+
 <html lang="ko">
+
 <head>
-<meta charset="UTF-8">
-<title>Baccarat</title>
+
+<meta charset="utf-8">
+
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>사이렌 사운드 패드</title>
+
 <style>
-body {
-    background: #0b1c2c;
-    color: white;
-    font-family: Arial;
-    text-align: center;
-}
 
-h1 {
-    margin-top: 20px;
-}
+body{margin:0;background:#111;color:#fff;font-family:-apple-system,BlinkMacSystemFont,sans-serif;display:flex;justify-content:center;min-height:100vh}
 
-.table {
-    display: flex;
-    justify-content: space-around;
-    margin-top: 40px;
-}
+.app{width:min(92vw,560px);margin:auto;padding:24px;border-radius:22px;background:#1d1d1f}
 
-.area {
-    border: 2px solid white;
-    padding: 20px;
-    width: 40%;
-    border-radius: 10px;
-}
+h1{margin:0 0 6px}.sub{color:#aaa;margin:0 0 20px;font-size:14px}
 
-.cards {
-    font-size: 30px;
-    margin: 20px;
-}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
 
-.chips button {
-    margin: 5px;
-    padding: 10px;
-    font-size: 16px;
-    cursor: pointer;
-}
+label,.filebtn{display:block;padding:16px;border:1px solid #555;border-radius:14px;text-align:center;cursor:pointer;background:#333;color:#fff;font-weight:700}
 
-.bet-area button {
-    margin: 10px;
-    padding: 10px 20px;
-    font-size: 18px;
-    cursor: pointer;
-}
+input[type=file]{display:none}
 
-#log {
-    margin-top: 20px;
-    height: 100px;
-    overflow-y: auto;
-    border-top: 1px solid white;
-}
+#buttons{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+button{border:0;border-radius:14px;padding:22px 10px;font-size:17px;font-weight:700;background:#333;color:white}
+
+button:active{transform:scale(.97)}.stop{background:#8d2222}
+
+.volume{margin-top:20px}.row{display:flex;justify-content:space-between;color:#ccc;margin-bottom:8px}
+
+input[type=range]{width:100%}#status{margin-top:14px;color:#aaa;font-size:13px;min-height:20px}
+
+#names{margin-top:12px;color:#bbb;font-size:13px;line-height:1.7}
+
+.note{margin-top:12px;color:#777;font-size:12px;line-height:1.5}
+
 </style>
+
 </head>
 
 <body>
 
-<h1>💰 Baccarat</h1>
+<div class="app">
 
-<div>보유 칩: <span id="cash">1000</span></div>
+<h1>사이렌 사운드 패드</h1>
 
-<div class="chips">
-    <button onclick="setBet(10)">10</button>
-    <button onclick="setBet(50)">50</button>
-    <button onclick="setBet(100)">100</button>
+<p class="sub">파일 앱의 MP3를 선택해서 버튼으로 바로 재생하세요.</p>
+
+<div class="actions">
+
+<label>＋ MP3 추가
+
+<input id="files" type="file" accept=".mp3,audio/mpeg,audio/*" multiple></label>
+
+<label>＋ 파일 앱에서 선택
+
+<input id="files2" type="file" accept=".mp3,audio/mpeg,audio/*" multiple></label>
+
 </div>
 
-<div>현재 베팅: <span id="bet">0</span></div>
+<div id="buttons"></div>
 
-<div class="bet-area">
-    <button onclick="play('P')">Player</button>
-    <button onclick="play('B')">Banker</button>
-    <button onclick="play('T')">Tie</button>
+<div class="volume">
+
+<div class="row"><span>볼륨</span><span id="vt">100%</span></div>
+
+<input id="vol" type="range" min="0" max="1" step=".01" value="1">
+
 </div>
 
-<div class="table">
-    <div class="area">
-        <h2>Player</h2>
-        <div class="cards" id="playerCards"></div>
-        <div id="playerScore"></div>
-    </div>
+<div id="status">MP3 파일을 추가하세요.</div>
 
-    <div class="area">
-        <h2>Banker</h2>
-        <div class="cards" id="bankerCards"></div>
-        <div id="bankerScore"></div>
-    </div>
+<div id="names"></div>
+
+<div class="note">※ iPhone에서는 파일 선택 창이 뜨면 「파일」 앱에서 MP3를 선택하세요.</div>
+
 </div>
-
-<div id="log"></div>
 
 <script>
-let cash = 1000;
-let bet = 0;
 
-function updateUI() {
-    document.getElementById("cash").innerText = cash;
-    document.getElementById("bet").innerText = bet;
+let sounds=[],current=null;
+
+const $=id=>document.getElementById(id);
+
+function stop(){
+
+ if(current){current.pause();current.currentTime=0;current=null}
+
+ $('status').textContent='꺼짐';
+
 }
 
-function setBet(amount) {
-    if (amount > cash) {
-        alert("칩 부족");
-        return;
-    }
-    bet = amount;
-    updateUI();
+function play(i){
+
+ if(!sounds[i])return;
+
+ stop();
+
+ current=new Audio(sounds[i].url);
+
+ current.volume=+$('vol').value;
+
+ current.play().then(()=>{
+
+   $('status').textContent='재생 중: '+sounds[i].name;
+
+ }).catch(()=>{
+
+   $('status').textContent='재생할 수 없습니다. 버튼을 다시 눌러보세요.';
+
+ });
+
+ current.onended=()=>{
+
+   current=null;
+
+   $('status').textContent='재생 완료';
+
+ };
+
 }
 
-function getCard() {
-    const cards = ['A','K','Q','J',2,3,4,5,6,7,8,9];
-    return cards[Math.floor(Math.random() * cards.length)];
+function addFiles(fileList){
+
+ const incoming=[...fileList].filter(f=>{
+
+   const name=f.name.toLowerCase();
+
+   return name.endsWith('.mp3') || f.type==='audio/mpeg' || f.type.startsWith('audio/');
+
+ });
+
+ incoming.forEach(f=>{
+
+   if(sounds.length>=12)return;
+
+   sounds.push({name:f.name,url:URL.createObjectURL(f)});
+
+ });
+
+ render();
+
 }
 
-function getValue(card) {
-    if (card === 'A') return 1;
-    if (['K','Q','J'].includes(card)) return 0;
-    return card;
+function render(){
+
+ $('buttons').innerHTML='';
+
+ sounds.forEach((s,i)=>{
+
+   let b=document.createElement('button');
+
+   b.textContent='▶ '+(i+1);
+
+   b.title=s.name;
+
+   b.onclick=()=>play(i);
+
+   $('buttons').appendChild(b);
+
+ });
+
+ let b=document.createElement('button');
+
+ b.textContent='■ 끄기';
+
+ b.className='stop';
+
+ b.onclick=stop;
+
+ $('buttons').appendChild(b);
+
+ $('names').innerHTML=sounds.length
+
+   ? sounds.map((s,i)=>(i+1)+'. '+s.name).join('<br>')
+
+   : '';
+
+ $('status').textContent=sounds.length+'개 준비 완료';
+
 }
 
-function calcScore(arr) {
-    let sum = arr.reduce((a,b)=>a+getValue(b),0);
-    return sum % 10;
-}
+$('files').onchange=e=>{addFiles(e.target.files);e.target.value=''};
 
-function play(choice) {
-    if (bet === 0) {
-        alert("베팅 먼저");
-        return;
-    }
+$('files2').onchange=e=>{addFiles(e.target.files);e.target.value=''};
 
-    if (bet > cash) {
-        alert("칩 부족");
-        return;
-    }
+$('vol').oninput=()=>{
 
-    cash -= bet;
+ const v=+$('vol').value;
 
-    let player = [getCard(), getCard()];
-    let banker = [getCard(), getCard()];
+ $('vt').textContent=Math.round(v*100)+'%';
 
-    // 카드 출력 (약간 애니메이션 느낌)
-    document.getElementById("playerCards").innerText = "";
-    document.getElementById("bankerCards").innerText = "";
+ if(current)current.volume=v;
 
-    setTimeout(()=>{
-        document.getElementById("playerCards").innerText = player.join(" ");
-        document.getElementById("bankerCards").innerText = banker.join(" ");
-    }, 500);
+};
 
-    let pScore = calcScore(player);
-    let bScore = calcScore(banker);
-
-    document.getElementById("playerScore").innerText = "점수: " + pScore;
-    document.getElementById("bankerScore").innerText = "점수: " + bScore;
-
-    let result = "";
-    if (pScore > bScore) result = 'P';
-    else if (bScore > pScore) result = 'B';
-    else result = 'T';
-
-    setTimeout(()=>{
-        if (choice === result) {
-            cash += bet * 2;
-            log("승리 🎉 (" + result + ")");
-        } else {
-            log("패배 💀 (" + result + ")");
-        }
-
-        bet = 0;
-        updateUI();
-
-        if (cash <= 0) {
-            alert("파산 💀 게임 종료");
-        }
-    }, 1000);
-}
-
-function log(text) {
-    const el = document.getElementById("log");
-    el.innerHTML += text + "<br>";
-    el.scrollTop = el.scrollHeight;
-}
-
-updateUI();
 </script>
 
 </body>
-</html>
+
+</html>'''
+
+path = Path("/mnt/data/siren_sound_pad_v2.html")
+
+path.write_text(html, encoding="utf-8")
+
+print(path)
