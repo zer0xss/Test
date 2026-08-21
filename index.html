@@ -211,6 +211,32 @@ padding:8px 4px;
 margin-top:2px;
 }
 
+.individual-volume{
+grid-column:1/-1;
+display:flex;
+align-items:center;
+gap:9px;
+padding:4px 4px 3px;
+}
+
+.individual-volume-label{
+font-size:11px;
+color:#888;
+white-space:nowrap;
+}
+
+.individual-volume-value{
+font-size:11px;
+color:#888;
+width:35px;
+text-align:right;
+}
+
+.individual-volume input{
+width:100%;
+margin:0;
+}
+
 .volume{
 margin-top:20px;
 }
@@ -335,7 +361,7 @@ autocomplete="current-password"
 <div id="loginError" class="login-error"></div>
 
 <div class="login-version">
-v1.1.7
+v1.1.8
 </div>
 
 </div>
@@ -349,7 +375,7 @@ v1.1.7
 
 <h1>
 사이렌 사운드 패드
-<span class="version">v1.1.7</span>
+<span class="version">v1.1.8</span>
 </h1>
 
 <p class="sub">
@@ -389,7 +415,7 @@ MP3 파일을 추가하세요.
 <div class="volume">
 
 <div class="row">
-<span>볼륨</span>
+<span>전체 볼륨</span>
 <span id="vt">100%</span>
 </div>
 
@@ -413,10 +439,10 @@ MP3 파일을 추가하세요.
 <div class="note">
 ※ 재생 버튼을 누를 때마다 해당 소리가 처음부터 다시 재생됩니다.<br>
 ※ 여러 소리를 동시에 재생할 수 있습니다.<br>
+※ 각 음원 아래의 볼륨으로 해당 음원만 조절할 수 있습니다.<br>
 ※ 「■ 끄기」는 해당 소리만 즉시 끕니다.<br>
 ※ 「삭제」는 해당 파일을 저장된 목록에서도 삭제합니다.<br>
-※ 「■ 모두 끄기」는 모든 소리를 즉시 끕니다.<br>
-※ 추가한 음악은 기기에 저장되어 다음에 다시 들어와도 유지됩니다.
+※ 「■ 모두 끄기」는 모든 소리를 즉시 끕니다.
 </div>
 
 </div>
@@ -514,7 +540,12 @@ loginPw.addEventListener(
 );
 
 
-/* 새로고침하면 로그인 유지 */
+/*
+   중요:
+   여기서는 loginId.focus()를 호출하지 않는다.
+   따라서 사이트에 들어왔을 때
+   키보드가 자동으로 뜨지 않는다.
+*/
 
 if(
     sessionStorage.getItem(
@@ -529,10 +560,10 @@ if(
 
 /* =========================================
    IndexedDB
-   음악 파일을 기기에 영구 저장
 ========================================= */
 
 let db=null;
+
 
 function openDatabase(){
 
@@ -549,6 +580,7 @@ function openDatabase(){
 
             const database =
                 e.target.result;
+
 
             if(
                 !database.objectStoreNames.contains(
@@ -595,6 +627,7 @@ async function saveSoundToDB(sound){
 
     if(!db)return;
 
+
     return new Promise(
         (resolve,reject)=>{
 
@@ -603,6 +636,7 @@ async function saveSoundToDB(sound){
                     "sounds",
                     "readwrite"
                 );
+
 
             const store =
                 transaction.objectStore(
@@ -659,6 +693,7 @@ async function deleteSoundFromDB(id){
                     "readwrite"
                 );
 
+
             const store =
                 transaction.objectStore(
                     "sounds"
@@ -673,7 +708,9 @@ async function deleteSoundFromDB(id){
                 ()=>resolve();
 
             request.onerror=
-                ()=>reject(request.error);
+                ()=>reject(
+                    request.error
+                );
 
         }
     );
@@ -694,6 +731,7 @@ async function loadSoundsFromDB(){
                     "sounds",
                     "readonly"
                 );
+
 
             const store =
                 transaction.objectStore(
@@ -716,7 +754,7 @@ async function loadSoundsFromDB(){
                     try{
 
                         const ctx =
-                            await unlockAudio();
+                            await getAudioContext();
 
 
                         const buffer =
@@ -743,7 +781,9 @@ async function loadSoundsFromDB(){
 
                             loading:false,
 
-                            error:false
+                            error:false,
+
+                            individualVolume:1
 
                         });
 
@@ -801,10 +841,12 @@ function getAudioContext(){
             window.AudioContext ||
             window.webkitAudioContext;
 
+
         audioContext =
             new AudioContextClass();
 
     }
+
 
     return audioContext;
 
@@ -853,9 +895,11 @@ async function playSound(i){
             s.source.stop(0);
         }catch(e){}
 
+
         try{
             s.source.disconnect();
         }catch(e){}
+
 
         s.source=null;
 
@@ -874,10 +918,13 @@ async function playSound(i){
         ctx.createGain();
 
 
+    /*
+       전체 볼륨 × 개별 볼륨
+    */
+
     gain.gain.value =
-        Number(
-            $("vol").value
-        );
+        Number($("vol").value) *
+        Number(s.individualVolume ?? 1);
 
 
     s.gain=gain;
@@ -936,9 +983,11 @@ function stopSound(i){
             s.source.stop(0);
         }catch(e){}
 
+
         try{
             s.source.disconnect();
         }catch(e){}
+
 
         s.source=null;
 
@@ -951,6 +1000,52 @@ function stopSound(i){
 
     render();
     updateStatus();
+
+}
+
+
+/* =========================================
+   개별 볼륨
+========================================= */
+
+function setIndividualVolume(i,value){
+
+    const s=sounds[i];
+
+    if(!s)return;
+
+
+    s.individualVolume =
+        Number(value);
+
+
+    /*
+       현재 재생 중이면 즉시 반영
+    */
+
+    if(s.gain){
+
+        s.gain.gain.value =
+            Number($("vol").value) *
+            s.individualVolume;
+
+    }
+
+
+    const valueElement =
+        document.getElementById(
+            "individualValue-"+i
+        );
+
+
+    if(valueElement){
+
+        valueElement.textContent =
+            Math.round(
+                s.individualVolume*100
+            )+"%";
+
+    }
 
 }
 
@@ -972,9 +1067,11 @@ async function deleteSound(i){
             s.source.stop(0);
         }catch(e){}
 
+
         try{
             s.source.disconnect();
         }catch(e){}
+
 
         s.source=null;
 
@@ -1025,13 +1122,16 @@ function stopAll(){
                 s.source.stop(0);
             }catch(e){}
 
+
             try{
                 s.source.disconnect();
             }catch(e){}
 
+
             s.source=null;
 
         }
+
 
         s.gain=null;
         s.active=false;
@@ -1099,7 +1199,9 @@ async function addFiles(fileList){
 
             loading:true,
 
-            error:false
+            error:false,
+
+            individualVolume:1
 
         };
 
@@ -1129,10 +1231,6 @@ async function addFiles(fileList){
 
             sound.loading=false;
 
-
-            /*
-               기기에 영구 저장
-            */
 
             await saveSoundToDB(
                 sound
@@ -1166,6 +1264,7 @@ function render(){
     const box =
         $("buttons");
 
+
     box.innerHTML="";
 
 
@@ -1184,12 +1283,14 @@ function render(){
         const row =
             document.createElement("div");
 
+
         row.className=
             "sound-row";
 
 
         const playButton =
             document.createElement("button");
+
 
         playButton.className=
             "sound-btn"+
@@ -1235,11 +1336,14 @@ function render(){
         const offButton =
             document.createElement("button");
 
+
         offButton.className=
             "sound-btn stop";
 
+
         offButton.textContent=
             "■ 끄기";
+
 
         offButton.onclick=
             ()=>stopSound(i);
@@ -1248,11 +1352,14 @@ function render(){
         const deleteButton =
             document.createElement("button");
 
+
         deleteButton.className=
             "sound-btn delete";
 
+
         deleteButton.textContent=
             "삭제";
+
 
         deleteButton.onclick=
             ()=>deleteSound(i);
@@ -1262,9 +1369,11 @@ function render(){
             playButton
         );
 
+
         row.appendChild(
             offButton
         );
+
 
         row.appendChild(
             deleteButton
@@ -1275,17 +1384,113 @@ function render(){
             row
         );
 
+
+        /*
+           개별 볼륨
+        */
+
+        const volumeBox =
+            document.createElement("div");
+
+
+        volumeBox.className=
+            "individual-volume";
+
+
+        const volumeLabel =
+            document.createElement("span");
+
+
+        volumeLabel.className=
+            "individual-volume-label";
+
+
+        volumeLabel.textContent=
+            "개별 볼륨";
+
+
+        const volumeSlider =
+            document.createElement("input");
+
+
+        volumeSlider.type=
+            "range";
+
+
+        volumeSlider.min="0";
+
+        volumeSlider.max="1";
+
+        volumeSlider.step=".01";
+
+        volumeSlider.value=
+            s.individualVolume ?? 1;
+
+
+        const volumeValue =
+            document.createElement("span");
+
+
+        volumeValue.className=
+            "individual-volume-value";
+
+
+        volumeValue.id=
+            "individualValue-"+i;
+
+
+        volumeValue.textContent=
+            Math.round(
+                (s.individualVolume ?? 1)*100
+            )+"%";
+
+
+        volumeSlider.addEventListener(
+            "input",
+            e=>{
+
+                setIndividualVolume(
+                    i,
+                    e.target.value
+                );
+
+            }
+        );
+
+
+        volumeBox.appendChild(
+            volumeLabel
+        );
+
+
+        volumeBox.appendChild(
+            volumeSlider
+        );
+
+
+        volumeBox.appendChild(
+            volumeValue
+        );
+
+
+        box.appendChild(
+            volumeBox
+        );
+
     });
 
 
     const allStop =
         document.createElement("button");
 
+
     allStop.className=
         "sound-btn stop all-stop";
 
+
     allStop.textContent=
         "■ 모두 끄기";
+
 
     allStop.onclick=
         stopAll;
@@ -1401,7 +1606,7 @@ $("files2").addEventListener(
 
 
 /* =========================================
-   볼륨
+   전체 볼륨
 ========================================= */
 
 $("vol").addEventListener(
@@ -1424,7 +1629,10 @@ $("vol").addEventListener(
             if(s.gain){
 
                 s.gain.gain.value=
-                    v;
+                    v *
+                    Number(
+                        s.individualVolume ?? 1
+                    );
 
             }
 
@@ -1440,10 +1648,6 @@ $("vol").addEventListener(
 
 render();
 
-
-/*
-   DB를 열고 저장된 음악을 불러온다.
-*/
 
 (async()=>{
 
