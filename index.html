@@ -5,18 +5,58 @@ html = r'''<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>사이렌 사운드 패드 v4</title>
+
+<title>사이렌 사운드 패드 v5</title>
 
 <style>
 *{box-sizing:border-box}
-html,body{margin:0;min-height:100%;background:#111;color:#fff}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:20px}
-.app{width:100%;max-width:560px;margin:0 auto;padding:22px;border-radius:22px;background:#1d1d1f;box-shadow:0 10px 35px #0008}
-h1{margin:0 0 6px;font-size:27px}
-.version{font-size:11px;color:#666;margin-left:6px;font-weight:400}
-.sub{color:#aaa;margin:0 0 20px;font-size:14px}
 
-.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+html,body{
+margin:0;
+min-height:100%;
+background:#111;
+color:#fff
+}
+
+body{
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+padding:20px
+}
+
+.app{
+width:100%;
+max-width:560px;
+margin:0 auto;
+padding:22px;
+border-radius:22px;
+background:#1d1d1f;
+box-shadow:0 10px 35px #0008
+}
+
+h1{
+margin:0 0 6px;
+font-size:27px
+}
+
+.version{
+font-size:10px;
+color:#666;
+font-weight:400;
+margin-left:5px
+}
+
+.sub{
+color:#aaa;
+margin:0 0 20px;
+font-size:14px
+}
+
+.actions{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
+margin-bottom:18px
+}
 
 .filebtn{
 display:flex;
@@ -33,7 +73,9 @@ color:#fff;
 font-weight:700
 }
 
-input[type=file]{display:none}
+input[type=file]{
+display:none
+}
 
 #buttons{
 display:grid;
@@ -59,10 +101,17 @@ background:#176b35;
 box-shadow:0 0 0 2px #2ee66b inset
 }
 
-.sound-btn:active{transform:scale(.97)}
-.stop{background:#8d2222}
+.sound-btn:active{
+transform:scale(.97)
+}
 
-.volume{margin-top:20px}
+.stop{
+background:#8d2222
+}
+
+.volume{
+margin-top:20px
+}
 
 .row{
 display:flex;
@@ -71,7 +120,9 @@ color:#ccc;
 margin-bottom:8px
 }
 
-input[type=range]{width:100%}
+input[type=range]{
+width:100%
+}
 
 #status{
 margin-top:14px;
@@ -103,11 +154,28 @@ padding:25px 5px
 }
 
 @media(max-width:400px){
-body{padding:12px}
-.app{padding:17px;border-radius:18px}
-.actions,#buttons{gap:8px}
-.filebtn{font-size:14px}
-.sound-btn{font-size:15px}
+
+body{
+padding:12px
+}
+
+.app{
+padding:17px;
+border-radius:18px
+}
+
+.actions,#buttons{
+gap:8px
+}
+
+.filebtn{
+font-size:14px
+}
+
+.sound-btn{
+font-size:15px
+}
+
 }
 </style>
 </head>
@@ -118,29 +186,41 @@ body{padding:12px}
 
 <h1>
 사이렌 사운드 패드
-<span class="version">v4</span>
+<span class="version">v5</span>
 </h1>
 
 <p class="sub">
-파일 앱의 MP3를 선택해서 여러 소리를 동시에 켜고 끌 수 있습니다.
+파일 앱의 MP3를 선택해서 버튼으로 바로 재생하세요.
 </p>
 
 <div class="actions">
 
 <label class="filebtn">
 ＋ MP3 추가
-<input id="files" type="file" accept=".mp3,audio/mpeg,audio/*" multiple>
+<input
+id="files"
+type="file"
+accept=".mp3,audio/mpeg,audio/*"
+multiple
+>
 </label>
 
 <label class="filebtn">
 ＋ 파일 앱에서 선택
-<input id="files2" type="file" accept=".mp3,audio/mpeg,audio/*" multiple>
+<input
+id="files2"
+type="file"
+accept=".mp3,audio/mpeg,audio/*"
+multiple
+>
 </label>
 
 </div>
 
 <div id="buttons">
-<div class="empty">MP3 파일을 추가하세요.</div>
+<div class="empty">
+MP3 파일을 추가하세요.
+</div>
 </div>
 
 <div class="volume">
@@ -150,7 +230,14 @@ body{padding:12px}
 <span id="vt">100%</span>
 </div>
 
-<input id="vol" type="range" min="0" max="1" step=".01" value="1">
+<input
+id="vol"
+type="range"
+min="0"
+max="1"
+step=".01"
+value="1"
+>
 
 </div>
 
@@ -161,8 +248,9 @@ MP3 파일을 추가하세요.
 <div id="names"></div>
 
 <div class="note">
-※ iPhone에서는 파일 선택 창에서 「파일」 앱에 있는 MP3를 선택하세요.<br>
-※ 버튼을 다시 누르면 해당 소리만 꺼집니다. 여러 버튼을 동시에 켤 수 있습니다.
+※ 버튼을 누를 때마다 해당 소리가 처음부터 즉시 다시 재생됩니다.<br>
+※ 여러 버튼을 동시에 재생할 수 있습니다.<br>
+※ 「■ 모두 끄기」를 누르면 모든 소리가 즉시 꺼집니다.
 </div>
 
 </div>
@@ -173,343 +261,343 @@ const sounds=[];
 const $=id=>document.getElementById(id);
 
 
-/* =========================
-   모두 끄기
-   ========================= */
+/* ==============================
+   전체 정지
+============================== */
 
 function stopAll(){
 
-  sounds.forEach(s=>{
+sounds.forEach(s=>{
 
-    if(s.audio){
-      s.audio.pause();
-      s.audio.currentTime=0;
-    }
+if(s.audio){
 
-    s.active=false;
+s.audio.pause();
 
-  });
+s.audio.currentTime=0;
 
-  render();
-  updateStatus();
+}
+
+s.active=false;
+
+});
+
+render();
+
+updateStatus();
 
 }
 
 
-/* =========================
-   소리 켜기 / 끄기
-   ========================= */
+/* ==============================
+   버튼 클릭
+   누를 때마다 무조건 처음부터 재생
+============================== */
 
-function toggle(i){
+function playSound(i){
 
-  const s=sounds[i];
+const s=sounds[i];
 
-  if(!s)return;
-
-
-  /* 이미 켜져 있으면 즉시 끄기 */
-
-  if(s.active){
-
-    if(s.audio){
-      s.audio.pause();
-      s.audio.currentTime=0;
-    }
-
-    s.active=false;
-
-    render();
-    updateStatus();
-
-    return;
-  }
+if(!s || !s.audio)return;
 
 
-  /*
+/*
+   중요:
+   새로운 Audio 객체를 만들지 않는다.
 
-     여기서 새로운 Audio를 만들지 않는다.
-
-     파일을 추가할 때 미리 만들어 놓은
-     preloaded Audio를 그대로 사용한다.
-
-  */
-
-  if(!s.audio){
-
-    s.audio=s.preloaded;
-
-    s.audio.volume=+$('vol').value;
-
-    s.audio.addEventListener('ended',()=>{
-
-      s.active=false;
-      s.audio.currentTime=0;
-
-      render();
-      updateStatus();
-
-    });
-
-  }
+   이미 파일을 추가할 때 만들어놓은
+   Audio 객체를 그대로 사용한다.
+*/
 
 
-  /* 즉시 처음부터 재생 */
+s.audio.pause();
 
-  s.audio.currentTime=0;
-  s.audio.volume=+$('vol').value;
+s.audio.currentTime=0;
 
-  s.active=true;
-
-  render();
-  updateStatus();
+s.audio.volume=+$('vol').value;
 
 
-  const p=s.audio.play();
+/*
+   여기서 바로 play().
+   화면 업데이트보다 먼저 실행해서
+   불필요한 지연을 줄인다.
+*/
+
+const promise=s.audio.play();
+
+s.active=true;
 
 
-  if(p){
+/*
+   버튼을 누를 때마다 처음부터 시작하므로
+   active 표시만 갱신한다.
+*/
 
-    p.catch(()=>{
+render();
 
-      s.active=false;
-      s.audio.currentTime=0;
+updateStatus();
 
-      render();
 
-      $('status').textContent=
-        '재생할 수 없습니다. 버튼을 다시 눌러보세요.';
+if(promise){
 
-    });
+promise.catch(()=>{
 
-  }
+s.active=false;
+
+render();
+
+$('status').textContent=
+'재생할 수 없습니다. 버튼을 다시 눌러보세요.';
+
+});
+
+}
 
 }
 
 
-/* =========================
+/* ==============================
    파일 추가
-   ========================= */
+============================== */
 
 function addFiles(fileList){
 
-  const incoming=[...fileList].filter(f=>{
+const incoming=[...fileList].filter(f=>{
 
-    const name=f.name.toLowerCase();
+const name=f.name.toLowerCase();
 
-    return (
-      name.endsWith('.mp3') ||
-      f.type==='audio/mpeg' ||
-      f.type.startsWith('audio/')
-    );
+return(
+name.endsWith('.mp3') ||
+f.type==='audio/mpeg' ||
+f.type.startsWith('audio/')
+);
 
-  });
-
-
-  incoming.forEach(f=>{
-
-    if(sounds.length>=12)return;
+});
 
 
-    /*
-       파일을 추가하는 순간 Audio를 만들어
-       미리 로드한다.
-    */
+incoming.forEach(f=>{
 
-    const audio=new Audio();
-
-    audio.preload='auto';
-
-    audio.src=URL.createObjectURL(f);
-
-    sounds.push({
-
-      name:f.name,
-      url:audio.src,
-
-      /*
-         실제 재생에 사용할 미리 준비된 Audio
-      */
-
-      audio:null,
-
-      preloaded:audio,
-
-      active:false
-
-    });
+if(sounds.length>=12)return;
 
 
-    audio.load();
+/*
+   파일을 추가하는 순간 Audio 객체 생성.
 
-  });
+   버튼을 눌렀을 때 Audio를 새로 만들지 않기 때문에
+   재생 버튼의 반응을 최대한 빠르게 한다.
+*/
+
+const audio=new Audio();
+
+audio.src=URL.createObjectURL(f);
+
+audio.preload='auto';
+
+audio.volume=+$('vol').value;
 
 
-  render();
-  updateStatus();
+/*
+   브라우저에게 미리 로딩하도록 요청
+*/
+
+audio.load();
+
+
+audio.addEventListener('ended',()=>{
+
+s.active=false;
+
+audio.currentTime=0;
+
+render();
+
+updateStatus();
+
+});
+
+
+sounds.push({
+
+name:f.name,
+
+audio:audio,
+
+active:false
+
+});
+
+});
+
+
+render();
+
+updateStatus();
 
 }
 
 
-/* =========================
-   버튼 화면
-   ========================= */
+/* ==============================
+   버튼 UI
+============================== */
 
 function render(){
 
-  const box=$('buttons');
+const box=$('buttons');
 
-  box.innerHTML='';
-
-
-  if(!sounds.length){
-
-    box.innerHTML=
-      '<div class="empty">MP3 파일을 추가하세요.</div>';
-
-  }else{
-
-    sounds.forEach((s,i)=>{
-
-      const b=document.createElement('button');
-
-      b.className=
-        'sound-btn'+(s.active?' active':'');
-
-      b.textContent=
-        (s.active?'■ ':'▶ ')+(i+1);
-
-      b.title=s.name;
-
-      b.setAttribute(
-        'aria-label',
-        s.name
-      );
-
-      b.onclick=()=>toggle(i);
-
-      box.appendChild(b);
-
-    });
+box.innerHTML='';
 
 
-    const b=document.createElement('button');
+if(!sounds.length){
 
-    b.className='sound-btn stop';
+box.innerHTML=
+'<div class="empty">MP3 파일을 추가하세요.</div>';
 
-    b.textContent='■ 모두 끄기';
-
-    b.onclick=stopAll;
-
-    box.appendChild(b);
-
-  }
-
-
-  $('names').innerHTML=sounds.length
-
-    ? sounds
-        .map((s,i)=>(i+1)+'. '+s.name)
-        .join('<br>')
-
-    : '';
+return;
 
 }
 
 
-/* =========================
-   상태 표시
-   ========================= */
+sounds.forEach((s,i)=>{
+
+const b=document.createElement('button');
+
+b.className=
+'sound-btn'+(s.active?' active':'');
+
+
+/*
+   버튼은 ON/OFF 토글이 아니다.
+
+   항상 ▶ 번호로 표시.
+   누르면 무조건 처음부터 재생.
+*/
+
+b.textContent='▶ '+(i+1);
+
+b.title=s.name;
+
+b.setAttribute(
+'aria-label',
+s.name
+);
+
+b.onclick=()=>playSound(i);
+
+box.appendChild(b);
+
+});
+
+
+const stop=document.createElement('button');
+
+stop.className='sound-btn stop';
+
+stop.textContent='■ 모두 끄기';
+
+stop.onclick=stopAll;
+
+box.appendChild(stop);
+
+
+$('names').innerHTML=
+sounds.map(
+(s,i)=>(i+1)+'. '+s.name
+).join('<br>');
+
+}
+
+
+/* ==============================
+   상태
+============================== */
 
 function updateStatus(){
 
-  const active=sounds.filter(
-    s=>s.active
-  );
+const active=sounds.filter(
+s=>s.active
+);
 
 
-  if(!sounds.length){
+if(!sounds.length){
 
-    $('status').textContent=
-      'MP3 파일을 추가하세요.';
+$('status').textContent=
+'MP3 파일을 추가하세요.';
 
-  }
-
-  else if(!active.length){
-
-    $('status').textContent=
-      sounds.length+
-      '개 준비 완료 · 모두 꺼짐';
-
-  }
-
-  else{
-
-    $('status').textContent=
-      '재생 중: '+
-      active
-        .map(s=>s.name)
-        .join(' + ');
-
-  }
+return;
 
 }
 
 
-/* =========================
+if(!active.length){
+
+$('status').textContent=
+sounds.length+
+'개 준비 완료 · 모두 꺼짐';
+
+return;
+
+}
+
+
+$('status').textContent=
+'재생 중: '+
+active
+.map(s=>s.name)
+.join(' + ');
+
+}
+
+
+/* ==============================
    파일 선택
-   ========================= */
+============================== */
 
 $('files').addEventListener(
-  'change',
-  e=>{
+'change',
+e=>{
 
-    addFiles(e.target.files);
+addFiles(e.target.files);
 
-    e.target.value='';
+e.target.value='';
 
-  }
+}
 );
 
 
 $('files2').addEventListener(
-  'change',
-  e=>{
+'change',
+e=>{
 
-    addFiles(e.target.files);
+addFiles(e.target.files);
 
-    e.target.value='';
+e.target.value='';
 
-  }
+}
 );
 
 
-/* =========================
+/* ==============================
    볼륨
-   ========================= */
+============================== */
 
 $('vol').addEventListener(
-  'input',
-  ()=>{
+'input',
+()=>{
 
-    const v=+$('vol').value;
+const v=+$('vol').value;
 
-    $('vt').textContent=
-      Math.round(v*100)+'%';
+$('vt').textContent=
+Math.round(v*100)+'%';
 
 
-    sounds.forEach(s=>{
+sounds.forEach(s=>{
 
-      if(s.audio){
-        s.audio.volume=v;
-      }
+if(s.audio){
+s.audio.volume=v;
+}
 
-      if(s.preloaded){
-        s.preloaded.volume=v;
-      }
+});
 
-    });
-
-  }
+}
 );
 
 
@@ -523,7 +611,11 @@ render();
 </html>'''
 
 
-path = Path("/mnt/data/siren_sound_pad_v4.html")
-path.write_text(html, encoding="utf-8")
+path = Path("/mnt/data/siren_sound_pad_v5.html")
+
+path.write_text(
+html,
+encoding="utf-8"
+)
 
 print(path)
