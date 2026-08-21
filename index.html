@@ -6,7 +6,7 @@ html = r'''<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 
-<title>사이렌 사운드 패드 v7</title>
+<title>사이렌 사운드 패드 v8</title>
 
 <style>
 *{
@@ -209,7 +209,7 @@ grid-template-columns:1fr 72px
 
 <h1>
 사이렌 사운드 패드
-<span class="version">v7</span>
+<span class="version">v8</span>
 </h1>
 
 <p class="sub">
@@ -581,24 +581,31 @@ function render(){
             'sound-btn' +
             (s.active ? ' active' : '');
 
+        /*
+           파일 확장자 제거
+        */
+
+        const displayName =
+            s.name.replace(/\.[^/.]+$/, '');
+
         if(s.loading){
 
             playButton.textContent=
-                '준비 중 '+(i+1);
+                '준비 중 '+displayName;
 
             playButton.disabled=true;
 
         }else if(s.error){
 
             playButton.textContent=
-                '오류 '+(i+1);
+                '오류 '+displayName;
 
             playButton.disabled=true;
 
         }else{
 
             playButton.textContent=
-                '▶ '+(i+1);
+                '▶ '+displayName;
 
             playButton.onclick=
                 ()=>playSound(i);
@@ -784,7 +791,7 @@ render();
 </body>
 </html>'''
 
-path=Path("/mnt/data/siren_sound_pad_v7.html")
+path=Path("/mnt/data/siren_sound_pad_v8.html")
 
 path.write_text(
     html,
