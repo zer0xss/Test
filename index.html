@@ -292,8 +292,6 @@ padding:23px;
 
 <body>
 
-<!-- 로그인 화면 -->
-
 <div id="loginScreen" class="login-wrap">
 
 <div class="login">
@@ -327,21 +325,18 @@ autocomplete="current-password"
 <div id="loginError" class="login-error"></div>
 
 <div class="login-version">
-v1.1.4
+v1.1.5
 </div>
 
 </div>
 
 </div>
-
-
-<!-- 사이렌 패드 -->
 
 <div id="mainApp" class="app hidden">
 
 <h1>
 사이렌 사운드 패드
-<span class="version">v1.0.0</span>
+<span class="version">v1.1.5</span>
 </h1>
 
 <p class="sub">
@@ -411,12 +406,9 @@ MP3 파일을 추가하세요.
 
 </div>
 
-
 <script>
 
-/* =========================================
-   로그인
-========================================= */
+/* 로그인 */
 
 const LOGIN_ID = "7yznv.o";
 const LOGIN_PASSWORD = "Lsj147214!";
@@ -440,6 +432,14 @@ const loginError =
     document.getElementById("loginError");
 
 
+function showMainApp(){
+
+    loginScreen.classList.add("hidden");
+    mainApp.classList.remove("hidden");
+
+}
+
+
 function login(){
 
     const id =
@@ -454,12 +454,14 @@ function login(){
         password === LOGIN_PASSWORD
     ){
 
-        loginScreen.classList.add("hidden");
+        sessionStorage.setItem(
+            "siren_logged_in",
+            "true"
+        );
 
-        mainApp.classList.remove("hidden");
+        showMainApp();
 
         loginError.textContent="";
-
         loginId.value="";
         loginPw.value="";
 
@@ -494,9 +496,20 @@ loginPw.addEventListener(
 );
 
 
-/* =========================================
-   사이렌 사운드 패드
-========================================= */
+/* 새로고침 시 로그인 유지 */
+
+if(
+    sessionStorage.getItem(
+        "siren_logged_in"
+    ) === "true"
+){
+
+    showMainApp();
+
+}
+
+
+/* 사이렌 */
 
 const sounds=[];
 
@@ -542,10 +555,6 @@ async function unlockAudio(){
 }
 
 
-/* =========================================
-   재생
-========================================= */
-
 async function playSound(i){
 
     const s=sounds[i];
@@ -576,7 +585,6 @@ async function playSound(i){
     const source =
         ctx.createBufferSource();
 
-
     source.buffer =
         s.buffer;
 
@@ -584,19 +592,14 @@ async function playSound(i){
     const gain =
         ctx.createGain();
 
-
     gain.gain.value =
         Number($("vol").value);
-
 
     s.gain=gain;
 
 
     source.connect(gain);
-
-    gain.connect(
-        ctx.destination
-    );
+    gain.connect(ctx.destination);
 
 
     source.onended=()=>{
@@ -627,10 +630,6 @@ async function playSound(i){
 
 }
 
-
-/* =========================================
-   개별 정지
-========================================= */
 
 function stopSound(i){
 
@@ -664,10 +663,6 @@ function stopSound(i){
 }
 
 
-/* =========================================
-   전체 정지
-========================================= */
-
 function stopAll(){
 
     sounds.forEach(s=>{
@@ -697,10 +692,6 @@ function stopAll(){
 
 }
 
-
-/* =========================================
-   파일 추가
-========================================= */
 
 async function addFiles(fileList){
 
@@ -735,24 +726,17 @@ async function addFiles(fileList){
         const sound={
 
             name:file.name,
-
             buffer:null,
-
             source:null,
-
             gain:null,
-
             active:false,
-
             loading:true,
-
             error:false
 
         };
 
 
         sounds.push(sound);
-
 
         render();
         updateStatus();
@@ -791,10 +775,6 @@ async function addFiles(fileList){
 }
 
 
-/* =========================================
-   UI
-========================================= */
-
 function render(){
 
     const box =
@@ -818,8 +798,7 @@ function render(){
         const row =
             document.createElement("div");
 
-        row.className=
-            "sound-row";
+        row.className="sound-row";
 
 
         const playButton =
@@ -859,38 +838,26 @@ function render(){
         }
 
 
-        playButton.title=
-            s.name;
+        playButton.title=s.name;
 
 
         const offButton =
             document.createElement("button");
 
-
         offButton.className=
             "sound-btn stop";
 
-
         offButton.textContent=
             "■ 끄기";
-
 
         offButton.onclick=
             ()=>stopSound(i);
 
 
-        row.appendChild(
-            playButton
-        );
+        row.appendChild(playButton);
+        row.appendChild(offButton);
 
-        row.appendChild(
-            offButton
-        );
-
-
-        box.appendChild(
-            row
-        );
+        box.appendChild(row);
 
     });
 
@@ -898,22 +865,16 @@ function render(){
     const allStop =
         document.createElement("button");
 
-
     allStop.className=
         "sound-btn stop all-stop";
-
 
     allStop.textContent=
         "■ 모두 끄기";
 
-
     allStop.onclick=
         stopAll;
 
-
-    box.appendChild(
-        allStop
-    );
+    box.appendChild(allStop);
 
 
     $("names").innerHTML=
@@ -927,22 +888,13 @@ function render(){
 }
 
 
-/* =========================================
-   상태
-========================================= */
-
 function updateStatus(){
 
     const active =
-        sounds.filter(
-            s=>s.active
-        );
-
+        sounds.filter(s=>s.active);
 
     const loading =
-        sounds.filter(
-            s=>s.loading
-        );
+        sounds.filter(s=>s.loading);
 
 
     if(!sounds.length){
@@ -985,18 +937,11 @@ function updateStatus(){
 }
 
 
-/* =========================================
-   파일 선택
-========================================= */
-
 $("files").addEventListener(
     "change",
     e=>{
 
-        addFiles(
-            e.target.files
-        );
-
+        addFiles(e.target.files);
         e.target.value="";
 
     }
@@ -1007,29 +952,19 @@ $("files2").addEventListener(
     "change",
     e=>{
 
-        addFiles(
-            e.target.files
-        );
-
+        addFiles(e.target.files);
         e.target.value="";
 
     }
 );
 
 
-/* =========================================
-   볼륨
-========================================= */
-
 $("vol").addEventListener(
     "input",
     ()=>{
 
-        const v =
-            Number(
-                $("vol").value
-            );
-
+        const v=
+            Number($("vol").value);
 
         $("vt").textContent=
             Math.round(v*100)+"%";
@@ -1038,9 +973,7 @@ $("vol").addEventListener(
         sounds.forEach(s=>{
 
             if(s.gain){
-
                 s.gain.gain.value=v;
-
             }
 
         });
