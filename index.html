@@ -1,12 +1,10 @@
-from pathlib import Path
-
-html = r'''<!doctype html>
+<!doctype html>
 <html lang="ko">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 
-<title>사이렌 사운드 패드 v8</title>
+<title>사이렌 사운드 패드</title>
 
 <style>
 *{
@@ -19,12 +17,12 @@ html,body{
 margin:0;
 min-height:100%;
 background:#111;
-color:#fff
+color:#fff;
 }
 
 body{
 font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-padding:20px
+padding:20px;
 }
 
 .app{
@@ -34,32 +32,109 @@ margin:0 auto;
 padding:22px;
 border-radius:22px;
 background:#1d1d1f;
-box-shadow:0 10px 35px #0008
+box-shadow:0 10px 35px #0008;
+}
+
+.login-wrap{
+width:100%;
+max-width:420px;
+margin:auto;
+min-height:calc(100vh - 40px);
+display:flex;
+align-items:center;
+}
+
+.login{
+width:100%;
+padding:28px;
+border-radius:22px;
+background:#1d1d1f;
+box-shadow:0 10px 35px #0008;
+}
+
+.login h1{
+margin:0 0 7px;
+font-size:27px;
+}
+
+.login-sub{
+margin:0 0 25px;
+color:#999;
+font-size:14px;
+}
+
+.input{
+width:100%;
+height:52px;
+margin-bottom:11px;
+padding:0 15px;
+border:1px solid #444;
+border-radius:13px;
+outline:none;
+background:#292929;
+color:#fff;
+font-size:16px;
+}
+
+.input:focus{
+border-color:#777;
+}
+
+.login-btn{
+width:100%;
+height:52px;
+margin-top:5px;
+border:0;
+border-radius:13px;
+background:#fff;
+color:#111;
+font-size:16px;
+font-weight:700;
+cursor:pointer;
+}
+
+.login-btn:active{
+transform:scale(.98);
+}
+
+.login-error{
+height:20px;
+margin-top:12px;
+text-align:center;
+font-size:13px;
+color:#ff6b6b;
+}
+
+.login-version{
+margin-top:20px;
+text-align:center;
+font-size:10px;
+color:#555;
 }
 
 h1{
 margin:0 0 6px;
-font-size:27px
+font-size:27px;
 }
 
 .version{
 font-size:10px;
 color:#666;
 font-weight:400;
-margin-left:5px
+margin-left:5px;
 }
 
 .sub{
 color:#aaa;
 margin:0 0 20px;
-font-size:14px
+font-size:14px;
 }
 
 .actions{
 display:grid;
 grid-template-columns:1fr 1fr;
 gap:10px;
-margin-bottom:18px
+margin-bottom:18px;
 }
 
 .filebtn{
@@ -74,23 +149,23 @@ text-align:center;
 cursor:pointer;
 background:#333;
 color:#fff;
-font-weight:700
+font-weight:700;
 }
 
 input[type=file]{
-display:none
+display:none;
 }
 
 #buttons{
 display:grid;
 grid-template-columns:1fr;
-gap:10px
+gap:10px;
 }
 
 .sound-row{
 display:grid;
 grid-template-columns:1fr 82px;
-gap:7px
+gap:7px;
 }
 
 .sound-btn{
@@ -104,51 +179,51 @@ font-weight:700;
 background:#333;
 color:#fff;
 cursor:pointer;
-overflow:hidden
+overflow:hidden;
 }
 
 .sound-btn.active{
 background:#176b35;
-box-shadow:0 0 0 2px #2ee66b inset
+box-shadow:0 0 0 2px #2ee66b inset;
 }
 
 .sound-btn:active{
-transform:scale(.97)
+transform:scale(.97);
 }
 
 .sound-btn:disabled{
 opacity:.5;
-cursor:default
+cursor:default;
 }
 
 .stop{
-background:#8d2222
+background:#8d2222;
 }
 
 .all-stop{
-margin-top:2px
+margin-top:2px;
 }
 
 .volume{
-margin-top:20px
+margin-top:20px;
 }
 
 .row{
 display:flex;
 justify-content:space-between;
 color:#ccc;
-margin-bottom:8px
+margin-bottom:8px;
 }
 
 input[type=range]{
-width:100%
+width:100%;
 }
 
 #status{
 margin-top:14px;
 color:#aaa;
 font-size:13px;
-min-height:20px
+min-height:20px;
 }
 
 #names{
@@ -156,47 +231,59 @@ margin-top:12px;
 color:#bbb;
 font-size:13px;
 line-height:1.7;
-word-break:break-all
+word-break:break-all;
 }
 
 .note{
 margin-top:12px;
 color:#777;
 font-size:12px;
-line-height:1.5
+line-height:1.5;
 }
 
 .empty{
 color:#777;
 text-align:center;
-padding:25px 5px
+padding:25px 5px;
+}
+
+.hidden{
+display:none !important;
 }
 
 @media(max-width:400px){
 
 body{
-padding:12px
+padding:12px;
 }
 
 .app{
 padding:17px;
-border-radius:18px
+border-radius:18px;
 }
 
 .actions{
-gap:8px
+gap:8px;
 }
 
 .filebtn{
-font-size:14px
+font-size:14px;
 }
 
 .sound-btn{
-font-size:15px
+font-size:15px;
 }
 
 .sound-row{
-grid-template-columns:1fr 72px
+grid-template-columns:1fr 72px;
+}
+
+.login-wrap{
+min-height:calc(100vh - 24px);
+}
+
+.login{
+padding:23px;
 }
 
 }
@@ -205,11 +292,56 @@ grid-template-columns:1fr 72px
 
 <body>
 
-<div class="app">
+<!-- 로그인 화면 -->
+
+<div id="loginScreen" class="login-wrap">
+
+<div class="login">
+
+<h1>로그인</h1>
+
+<p class="login-sub">
+사이렌 사운드 패드에 접속하려면 로그인하세요.
+</p>
+
+<input
+id="loginId"
+class="input"
+type="text"
+placeholder="아이디"
+autocomplete="username"
+>
+
+<input
+id="loginPw"
+class="input"
+type="password"
+placeholder="비밀번호"
+autocomplete="current-password"
+>
+
+<button id="loginBtn" class="login-btn">
+로그인
+</button>
+
+<div id="loginError" class="login-error"></div>
+
+<div class="login-version">
+v1.1.4
+</div>
+
+</div>
+
+</div>
+
+
+<!-- 사이렌 패드 -->
+
+<div id="mainApp" class="app hidden">
 
 <h1>
 사이렌 사운드 패드
-<span class="version">v8</span>
+<span class="version">v1.0.0</span>
 </h1>
 
 <p class="sub">
@@ -279,17 +411,100 @@ MP3 파일을 추가하세요.
 
 </div>
 
+
 <script>
 
-const sounds=[];
-const $=id=>document.getElementById(id);
+/* =========================================
+   로그인
+========================================= */
 
-let audioContext=null;
+const LOGIN_ID = "7yznv.o";
+const LOGIN_PASSWORD = "Lsj147214!";
+
+const loginScreen =
+    document.getElementById("loginScreen");
+
+const mainApp =
+    document.getElementById("mainApp");
+
+const loginId =
+    document.getElementById("loginId");
+
+const loginPw =
+    document.getElementById("loginPw");
+
+const loginBtn =
+    document.getElementById("loginBtn");
+
+const loginError =
+    document.getElementById("loginError");
+
+
+function login(){
+
+    const id =
+        loginId.value;
+
+    const password =
+        loginPw.value;
+
+
+    if(
+        id === LOGIN_ID &&
+        password === LOGIN_PASSWORD
+    ){
+
+        loginScreen.classList.add("hidden");
+
+        mainApp.classList.remove("hidden");
+
+        loginError.textContent="";
+
+        loginId.value="";
+        loginPw.value="";
+
+    }else{
+
+        loginError.textContent=
+            "아이디 또는 비밀번호가 올바르지 않습니다.";
+
+        loginPw.value="";
+        loginPw.focus();
+
+    }
+
+}
+
+
+loginBtn.addEventListener(
+    "click",
+    login
+);
+
+
+loginPw.addEventListener(
+    "keydown",
+    e=>{
+
+        if(e.key==="Enter"){
+            login();
+        }
+
+    }
+);
 
 
 /* =========================================
-   Web Audio 초기화
+   사이렌 사운드 패드
 ========================================= */
+
+const sounds=[];
+
+const $=id=>
+    document.getElementById(id);
+
+let audioContext=null;
+
 
 function getAudioContext(){
 
@@ -309,16 +524,12 @@ function getAudioContext(){
 }
 
 
-/* =========================================
-   오디오 컨텍스트 활성화
-========================================= */
-
 async function unlockAudio(){
 
     const ctx =
         getAudioContext();
 
-    if(ctx.state === 'suspended'){
+    if(ctx.state === "suspended"){
 
         try{
             await ctx.resume();
@@ -332,7 +543,7 @@ async function unlockAudio(){
 
 
 /* =========================================
-   개별 소리 재생
+   재생
 ========================================= */
 
 async function playSound(i){
@@ -342,8 +553,10 @@ async function playSound(i){
     if(!s || !s.buffer || s.loading)
         return;
 
+
     const ctx =
         await unlockAudio();
+
 
     if(s.source){
 
@@ -359,17 +572,25 @@ async function playSound(i){
 
     }
 
+
     const source =
         ctx.createBufferSource();
+
 
     source.buffer =
         s.buffer;
 
+
     const gain =
         ctx.createGain();
 
+
     gain.gain.value =
-        Number($('vol').value);
+        Number($("vol").value);
+
+
+    s.gain=gain;
+
 
     source.connect(gain);
 
@@ -377,11 +598,13 @@ async function playSound(i){
         ctx.destination
     );
 
+
     source.onended=()=>{
 
         if(s.source===source){
 
             s.source=null;
+            s.gain=null;
             s.active=false;
 
             render();
@@ -391,10 +614,13 @@ async function playSound(i){
 
     };
 
+
     s.source=source;
     s.active=true;
 
+
     source.start(0);
+
 
     render();
     updateStatus();
@@ -403,7 +629,7 @@ async function playSound(i){
 
 
 /* =========================================
-   개별 소리 정지
+   개별 정지
 ========================================= */
 
 function stopSound(i){
@@ -411,6 +637,7 @@ function stopSound(i){
     const s=sounds[i];
 
     if(!s)return;
+
 
     if(s.source){
 
@@ -426,7 +653,10 @@ function stopSound(i){
 
     }
 
+
+    s.gain=null;
     s.active=false;
+
 
     render();
     updateStatus();
@@ -435,7 +665,7 @@ function stopSound(i){
 
 
 /* =========================================
-   모든 소리 정지
+   전체 정지
 ========================================= */
 
 function stopAll(){
@@ -456,9 +686,11 @@ function stopAll(){
 
         }
 
+        s.gain=null;
         s.active=false;
 
     });
+
 
     render();
     updateStatus();
@@ -467,34 +699,38 @@ function stopAll(){
 
 
 /* =========================================
-   MP3 파일 추가
+   파일 추가
 ========================================= */
 
 async function addFiles(fileList){
 
     const incoming=[...fileList].filter(f=>{
 
-        const name=
+        const name =
             f.name.toLowerCase();
 
         return(
-            name.endsWith('.mp3') ||
-            f.type==='audio/mpeg' ||
-            f.type.startsWith('audio/')
+            name.endsWith(".mp3") ||
+            f.type==="audio/mpeg" ||
+            f.type.startsWith("audio/")
         );
 
     });
 
+
     if(!incoming.length)
         return;
 
+
     const ctx =
         await unlockAudio();
+
 
     for(const file of incoming){
 
         if(sounds.length>=12)
             break;
+
 
         const sound={
 
@@ -504,6 +740,8 @@ async function addFiles(fileList){
 
             source:null,
 
+            gain:null,
+
             active:false,
 
             loading:true,
@@ -512,22 +750,28 @@ async function addFiles(fileList){
 
         };
 
+
         sounds.push(sound);
+
 
         render();
         updateStatus();
+
 
         try{
 
             const arrayBuffer =
                 await file.arrayBuffer();
 
+
             sound.buffer =
                 await ctx.decodeAudioData(
                     arrayBuffer.slice(0)
                 );
 
+
             sound.loading=false;
+
 
         }catch(error){
 
@@ -538,6 +782,7 @@ async function addFiles(fileList){
 
         }
 
+
         render();
         updateStatus();
 
@@ -547,15 +792,16 @@ async function addFiles(fileList){
 
 
 /* =========================================
-   버튼 UI
+   UI
 ========================================= */
 
 function render(){
 
     const box =
-        $('buttons');
+        $("buttons");
 
-    box.innerHTML='';
+    box.innerHTML="";
+
 
     if(!sounds.length){
 
@@ -566,66 +812,72 @@ function render(){
 
     }
 
+
     sounds.forEach((s,i)=>{
 
         const row =
-            document.createElement('div');
+            document.createElement("div");
 
         row.className=
-            'sound-row';
+            "sound-row";
+
 
         const playButton =
-            document.createElement('button');
+            document.createElement("button");
 
         playButton.className=
-            'sound-btn' +
-            (s.active ? ' active' : '');
+            "sound-btn"+
+            (s.active ? " active" : "");
 
-        /*
-           파일 확장자 제거
-        */
 
         const displayName =
-            s.name.replace(/\.[^/.]+$/, '');
+            s.name.replace(/\.[^/.]+$/,"");
+
 
         if(s.loading){
 
             playButton.textContent=
-                '준비 중 '+displayName;
+                "준비 중 "+displayName;
 
             playButton.disabled=true;
 
         }else if(s.error){
 
             playButton.textContent=
-                '오류 '+displayName;
+                "오류 "+displayName;
 
             playButton.disabled=true;
 
         }else{
 
             playButton.textContent=
-                '▶ '+displayName;
+                "▶ "+displayName;
 
             playButton.onclick=
                 ()=>playSound(i);
 
         }
 
+
         playButton.title=
             s.name;
 
+
         const offButton =
-            document.createElement('button');
+            document.createElement("button");
+
 
         offButton.className=
-            'sound-btn stop';
+            "sound-btn stop";
+
 
         offButton.textContent=
-            '■ 끄기';
+            "■ 끄기";
+
 
         offButton.onclick=
             ()=>stopSound(i);
+
 
         row.appendChild(
             playButton
@@ -635,41 +887,48 @@ function render(){
             offButton
         );
 
+
         box.appendChild(
             row
         );
 
     });
 
+
     const allStop =
-        document.createElement('button');
+        document.createElement("button");
+
 
     allStop.className=
-        'sound-btn stop all-stop';
+        "sound-btn stop all-stop";
+
 
     allStop.textContent=
-        '■ 모두 끄기';
+        "■ 모두 끄기";
+
 
     allStop.onclick=
         stopAll;
+
 
     box.appendChild(
         allStop
     );
 
-    $('names').innerHTML=
+
+    $("names").innerHTML=
         sounds
         .map(
             (s,i)=>
-                (i+1)+'. '+s.name
+                (i+1)+". "+s.name
         )
-        .join('<br>');
+        .join("<br>");
 
 }
 
 
 /* =========================================
-   상태 표시
+   상태
 ========================================= */
 
 function updateStatus(){
@@ -679,44 +938,49 @@ function updateStatus(){
             s=>s.active
         );
 
+
     const loading =
         sounds.filter(
             s=>s.loading
         );
 
+
     if(!sounds.length){
 
-        $('status').textContent=
-            'MP3 파일을 추가하세요.';
+        $("status").textContent=
+            "MP3 파일을 추가하세요.";
 
         return;
 
     }
+
 
     if(loading.length){
 
-        $('status').textContent=
-            'MP3 준비 중...';
+        $("status").textContent=
+            "MP3 준비 중...";
 
         return;
 
     }
+
 
     if(!active.length){
 
-        $('status').textContent=
+        $("status").textContent=
             sounds.length+
-            '개 준비 완료 · 모두 꺼짐';
+            "개 준비 완료 · 모두 꺼짐";
 
         return;
 
     }
 
-    $('status').textContent=
-        '재생 중: '+
+
+    $("status").textContent=
+        "재생 중: "+
         active
         .map(s=>s.name)
-        .join(' + ');
+        .join(" + ");
 
 }
 
@@ -725,28 +989,29 @@ function updateStatus(){
    파일 선택
 ========================================= */
 
-$('files').addEventListener(
-    'change',
+$("files").addEventListener(
+    "change",
     e=>{
 
         addFiles(
             e.target.files
         );
 
-        e.target.value='';
+        e.target.value="";
 
     }
 );
 
-$('files2').addEventListener(
-    'change',
+
+$("files2").addEventListener(
+    "change",
     e=>{
 
         addFiles(
             e.target.files
         );
 
-        e.target.value='';
+        e.target.value="";
 
     }
 );
@@ -756,17 +1021,19 @@ $('files2').addEventListener(
    볼륨
 ========================================= */
 
-$('vol').addEventListener(
-    'input',
+$("vol").addEventListener(
+    "input",
     ()=>{
 
         const v =
             Number(
-                $('vol').value
+                $("vol").value
             );
 
-        $('vt').textContent=
-            Math.round(v*100)+'%';
+
+        $("vt").textContent=
+            Math.round(v*100)+"%";
+
 
         sounds.forEach(s=>{
 
@@ -782,20 +1049,9 @@ $('vol').addEventListener(
 );
 
 
-/* 초기 화면 */
-
 render();
 
 </script>
 
 </body>
-</html>'''
-
-path=Path("/mnt/data/siren_sound_pad_v8.html")
-
-path.write_text(
-    html,
-    encoding="utf-8"
-)
-
-print(path)
+</html>
